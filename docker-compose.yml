@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  # Code execution judge container (pre-built image)
+  judge:
+    build:
+      context: ./docker/judge
+      dockerfile: Dockerfile
+    image: shodh-judge:latest
+    container_name: shodh-judge
+    # This container is not run directly, just built
+    # The backend will spawn ephemeral containers from this image
+    command: /bin/true
+    restart: "no"
+
+  # Backend Spring Boot API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: shodh-backend:latest
+    container_name: shodh-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:testdb
+    volumes:
+      # Mount Docker socket so backend can spawn judge containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Temp directory for code files (shared with host)
+      - /tmp/judge:/tmp/judge
+    depends_on:
+      - judge
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend React application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: shodh-frontend:latest
+    container_name: shodh-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=http://localhost:8080/api
+
+networks:
+  default:
+    name: shodh-network
