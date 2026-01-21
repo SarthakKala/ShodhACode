@@ -2,154 +2,92 @@
 
 A real-time coding contest platform built with **Spring Boot** (backend) and **React** (frontend), featuring live code judging, instant feedback, and dynamic leaderboards.
 
-![Tech Stack](https://img.shields.io/badge/Backend-Spring%20Boot-green) ![Frontend](https://img.shields.io/badge/Frontend-React%20+%20Vite-blue) ![Database](https://img.shields.io/badge/Database-H2-orange) ![Styling](https://img.shields.io/badge/Styling-Tailwind%20CSS-purple)
+## Live Demo
 
-## 🎯 Project Overview
+- **Frontend**: https://shodh-a-code-66uq.vercel.app/
+- **Backend API**: https://shodh-ai-backend.onrender.com
+- **Health Check**: https://shodh-ai-backend.onrender.com/api/health
 
-This platform enables students to participate in coding contests with real-time judging and leaderboard updates. The system accepts code submissions, evaluates them against test cases, and provides instant feedback while maintaining live rankings.
-
-## 🏗️ Architecture
-
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   React     │────▶│  Spring Boot │────▶│  H2 Database│
-│   Frontend  │◀────│   Backend    │◀────│   (In-Memory)│
-└─────────────┘     └─────────────┘     └─────────────┘
-     │                    │
-     │                    │
-     ▼                    ▼
- [User Interface]    [Code Judge Engine]
-```
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- **Docker** and **Docker Compose** (recommended for production-like setup)
-- OR **Java 21+**, **Node.js 18+**, **Maven 3.8+** (for local development)
+Test with **Contest ID: 1** and any username.
 
 ---
 
-### Option 1: Docker Setup (Recommended)
+## Setup Instructions
 
-This is the **easiest and recommended** way to run the entire application with Docker containers.
+### Prerequisites
 
-#### Step 1: Build the Judge Container Image
+- **Docker** and **Docker Compose**
+- OR **Java 21+**, **Node.js 18+**, **Maven 3.8+** (for local development)
+
+### Running with Docker Compose (Recommended)
+
+This is the simplest way to run the entire application locally using a single `docker-compose.yml` file.
+
+**Step 1: Build the Judge Container**
 
 ```bash
-# Build the code execution environment
 docker build -t shodh-judge:latest ./docker/judge
 ```
 
-#### Step 2: Start All Services with Docker Compose
+**Step 2: Start All Services**
 
 ```bash
-# From project root directory
 docker-compose up --build
 ```
 
-This will:
+This single command will:
 
-- Build and start the **backend** on `http://localhost:8080`
-- Build and start the **frontend** on `http://localhost:3000`
-- Create the **judge container** for secure code execution
+- Build and start the backend on `http://localhost:8080`
+- Build and start the frontend on `http://localhost:3000`
+- Configure the judge container for secure code execution
 
-#### Step 3: Access the Application
+**Step 3: Access the Application**
 
-1. Open `http://localhost:3000` in your browser
-2. Use **Contest ID: 1** for the demo contest
-3. Enter any username to join
+Open `http://localhost:3000` in your browser, enter Contest ID `1` and any username.
 
-#### To Stop All Services
+**To Stop:**
 
 ```bash
 docker-compose down
 ```
 
+### Local Development (Without Docker)
+
+**Backend:**
+
+```bash
+cd backend
+mvn spring-boot:run
+# Runs on http://localhost:8080
+```
+
+**Frontend:**
+
+```bash
+cd frontend
+npm install --legacy-peer-deps
+npm run dev
+# Runs on http://localhost:5173
+```
+
 ---
 
-### Option 2: Local Development Setup
+## API Design
 
-For development without Docker (code will execute locally - less secure):
+### Endpoints Overview
 
-#### 1. Start the Backend
+| Method | Endpoint                                | Description                                    |
+| ------ | --------------------------------------- | ---------------------------------------------- |
+| GET    | `/api/contests/{contestId}`             | Fetch contest details and problems             |
+| POST   | `/api/submissions`                      | Submit code for judging (returns submissionId) |
+| GET    | `/api/submissions/{submissionId}`       | Get submission status                          |
+| GET    | `/api/contests/{contestId}/leaderboard` | Get live leaderboard                           |
 
-```bash
-# Navigate to backend directory
-cd backend
-
-# Install dependencies and run
-mvn spring-boot:run
-```
-
-The backend will start on `http://localhost:8080`
-
-#### 2. Start the Frontend
-
-```bash
-# Navigate to frontend directory
-cd frontend
-
-# Install dependencies
-npm install --legacy-peer-deps
-
-# Start development server
-npm run dev
-```
-
-The frontend will start on `http://localhost:5173`
-
-#### 3. Access the Application
-
-1. Open `http://localhost:5173` in your browser
-2. Use **Contest ID: 1** for the demo contest
-3. Enter any username to join
-
-## 📁 Project Structure
-
-```
-shodh-a-code/
-├── backend/                  # Spring Boot Backend
-│   ├── src/main/java/
-│   │   └── com/shodh/backend/
-│   │       ├── config/      # Configuration (CORS, Async, Data Init)
-│   │       ├── controller/  # REST API endpoints
-│   │       ├── dto/        # Data Transfer Objects
-│   │       ├── model/      # JPA Entities
-│   │       ├── repository/ # Database repositories
-│   │       └── service/    # Business logic
-│   └── pom.xml
-│
-├── frontend/                # React Frontend
-│   ├── src/
-│   │   ├── components/    # Reusable components
-│   │   ├── pages/        # Page components
-│   │   ├── services/     # API service layer
-│   │   └── index.css     # Global styles
-│   └── package.json
-│
-└── README.md
-```
-
-## 🔧 API Endpoints
-
-### Contest Management
-
-| Method | Endpoint                                | Description                       |
-| ------ | --------------------------------------- | --------------------------------- |
-| GET    | `/api/contests/{contestId}`             | Get contest details with problems |
-| GET    | `/api/contests/{contestId}/leaderboard` | Get live leaderboard              |
-
-### Submission Management
-
-| Method | Endpoint                          | Description             |
-| ------ | --------------------------------- | ----------------------- |
-| POST   | `/api/submissions`                | Submit code for judging |
-| GET    | `/api/submissions/{submissionId}` | Get submission status   |
-
-### Request/Response Examples
+### Request/Response Formats
 
 #### Submit Code
+
+**Request:**
 
 ```json
 POST /api/submissions
@@ -157,194 +95,269 @@ POST /api/submissions
   "username": "alice",
   "contestId": 1,
   "problemId": 1,
-  "code": "class Solution { ... }",
+  "code": "public int[] twoSum(int[] nums, int target) { ... }",
   "language": "java"
 }
 ```
 
-#### Response
+**Response:**
 
 ```json
 {
-  "submissionId": 1,
+  "submissionId": 42,
   "status": "PENDING",
   "username": "alice",
   "problemId": 1,
-  ...
+  "problemTitle": "Two Sum",
+  "submittedAt": "2025-10-30T02:15:30"
 }
 ```
 
-## 🎨 Features
+#### Get Submission Status
 
-### Frontend Features
+**Request:**
 
-- **Modern Dark Theme** with glass morphism effects
-- **Monaco Code Editor** with syntax highlighting
-- **Real-time Status Updates** (polling every 2-3 seconds)
-- **Live Leaderboard** (updates every 15 seconds)
-- **Responsive Design** for all screen sizes
+```
+GET /api/submissions/42
+```
 
-### Backend Features
+**Response:**
 
-- **Asynchronous Code Judging** with thread pool execution
-- **Multiple Submission Statuses**: PENDING, RUNNING, ACCEPTED, WRONG_ANSWER, etc.
-- **Test Case Management** with sample and hidden test cases
-- **Pre-populated Data** for immediate testing
-- **CORS Configuration** for frontend integration
+```json
+{
+  "submissionId": 42,
+  "status": "ACCEPTED",
+  "executionTime": 145,
+  "memoryUsed": 2048,
+  "output": "0 1",
+  "error": null
+}
+```
 
-## 💾 Database Schema
+**Status Values:** `PENDING`, `RUNNING`, `ACCEPTED`, `WRONG_ANSWER`, `TIME_LIMIT_EXCEEDED`, `RUNTIME_ERROR`, `COMPILATION_ERROR`
 
-### Core Entities
+#### Get Contest
 
-- **User**: Stores participant information
-- **Contest**: Contest details and timing
-- **Problem**: Problem statements with constraints
-- **TestCase**: Input/output test cases
-- **Submission**: Code submissions and results
+**Response:**
 
-### Pre-populated Data
+```json
+{
+  "id": 1,
+  "title": "Weekly Coding Contest #1",
+  "isActive": true,
+  "participantsCount": 5,
+  "problems": [
+    {
+      "id": 1,
+      "title": "Two Sum",
+      "description": "...",
+      "sampleInput": "4 9\n2 7 11 15",
+      "sampleOutput": "0 1",
+      "timeLimit": 1,
+      "memoryLimit": 256,
+      "points": 100
+    }
+  ]
+}
+```
 
-- **2 Contests**:
-  - Contest 1 (Active): 3 problems - Two Sum, Palindrome Number, FizzBuzz
-  - Contest 2 (Future): 1 problem
-- **3 Sample Users**: alice, bob, charlie
+#### Get Leaderboard
 
-## 🔄 Submission Flow
+**Response:**
 
-1. User submits code through the frontend
-2. Backend receives submission and returns `submissionId`
-3. Submission queued with `PENDING` status
-4. Judge service processes submission asynchronously
-5. Status updates to `RUNNING`
-6. Code executed against test cases
-7. Final verdict determined (`ACCEPTED`, `WRONG_ANSWER`, etc.)
-8. Frontend polls for status updates
-9. Leaderboard updates automatically
+```json
+{
+  "contestId": 1,
+  "lastUpdated": "2025-10-30T02:30:00",
+  "entries": [
+    {
+      "rank": 1,
+      "username": "alice",
+      "problemsSolved": 3,
+      "totalPoints": 350,
+      "totalTime": 1800000
+    }
+  ]
+}
+```
 
-## 🛠️ Technology Stack
+---
 
-### Backend
+## Design Choices & Justification
 
-- **Spring Boot 3.5.7** - REST API framework
-- **Spring Data JPA** - Database ORM
-- **H2 Database** - In-memory database
-- **Lombok** - Reduce boilerplate code
-- **Maven** - Dependency management
+### How Services are Structured on the Backend
 
-### Frontend
+The backend follows a **layered service architecture**:
 
-- **React 18** - UI library
-- **Vite** - Build tool
-- **Tailwind CSS** - Utility-first CSS
-- **Monaco Editor** - Code editor
-- **Axios** - HTTP client
-- **React Router** - Navigation
-- **Framer Motion** - Animations
-- **React Hot Toast** - Notifications
+**1. Controller Layer** (`controller/`)
 
-## 🎯 Design Decisions
+- Handles HTTP requests and responses
+- Validates input using `@Valid` annotations
+- Delegates business logic to services
+- Returns DTOs, never exposes JPA entities directly
 
-### Architectural Choices
+**2. Service Layer** (`service/`)
 
-1. **Microservice-Ready Architecture**: Backend and frontend are completely decoupled, communicating only through REST APIs.
+- **ContestService**: Retrieves contest data and transforms entities to DTOs
+- **SubmissionService**: Manages submission lifecycle, creates users, triggers async judging
+- **JudgeService**: Orchestrates Docker containers, wraps user functions, executes code, validates output
+- **LeaderboardService**: Calculates rankings with multi-criteria sorting (problems solved → points → time)
 
-2. **Asynchronous Processing**: Code judging happens asynchronously to prevent blocking API responses.
+**3. Repository Layer** (`repository/`)
 
-3. **Polling vs WebSockets**: Chose polling for simplicity and to avoid WebSocket complexity in the prototype.
+- JPA interfaces extending `JpaRepository`
+- Custom queries for complex operations (e.g., finding accepted submissions)
+- Abstracts database operations
 
-4. **In-Memory Database**: H2 for rapid development and testing without external dependencies.
+**Why this structure?**
 
-### Frontend Design
+- Clear separation of concerns makes code maintainable
+- Easy to test (mock services in unit tests)
+- Flexible to swap implementations (H2 → PostgreSQL requires only config changes)
 
-1. **Glass Morphism UI**: Modern, visually appealing dark theme with transparency effects.
+### Frontend State Management Approach
 
-2. **Component-Based Architecture**: Reusable components for maintainability.
+**Chosen Approach:** Local component state with React hooks (`useState`, `useEffect`)
 
-3. **State Management**: Local component state with props drilling (sufficient for current scope).
+**Why not Redux/Context API?**
 
-### Backend Design
+- **Simplicity**: State is limited to contest data, code, and leaderboard
+- **Shallow component tree**: Only 2-3 levels, prop drilling is manageable
+- **Performance**: No global state overhead, components re-render only when their data changes
+- **Development speed**: Faster iteration without boilerplate
 
-1. **Service Layer Pattern**: Clear separation between controllers, services, and repositories.
+**State Distribution:**
 
-2. **DTO Pattern**: Separate data transfer objects from entities for API flexibility.
+- `ContestPage`: Contest data, selected problem, active tab
+- `CodeEditor`: Per-language code persistence, submission status
+- `Leaderboard`: Rankings data with auto-refresh
 
-3. **Repository Pattern**: Abstract database operations for easy switching between databases.
+**Persistence Strategy:**
 
-## 🐳 Docker Architecture
+- Code stored in `localStorage` per language and problem
+- Survives browser refresh
+- No backend storage needed for draft code
 
-> **📚 For detailed Docker setup, see [DOCKER_SETUP.md](DOCKER_SETUP.md)**
+### Docker Orchestration Challenges & Trade-offs
 
-### Code Execution Flow with Docker
+#### Challenge 1: Docker-in-Docker for Code Execution
 
-1. **User submits code** → Backend receives submission
-2. **Backend writes code** to temporary file in `/tmp/judge`
-3. **Backend spawns Docker container** (`shodh-judge:latest`) with:
-   - User code mounted as volume
-   - Memory limit (e.g., 256MB)
-   - CPU limit (1 core)
-   - Network disabled (security)
-   - Time limit enforced
-4. **Container compiles code** (if needed: Java, C++)
-5. **Container executes code** against test cases
-6. **Backend captures stdout** and compares with expected output
-7. **Container auto-removed** after execution
-8. **Temp files cleaned up**
+**Problem:** Backend (running in Docker) needs to spawn judge containers on the host
 
-### Security Features
+**Solution:** Mount Docker socket (`/var/run/docker.sock`) into backend container
 
-- **Network Isolation**: Containers run with `--network none`
-- **Non-root User**: Code executes as `coderunner` user (UID 1000)
-- **Resource Limits**: Memory and CPU constraints enforced
-- **Auto-cleanup**: Containers and temp files removed after execution
-- **Time Limits**: Process killed if exceeds time limit
+**Trade-offs:**
 
-### Judge Container Contents
+- **Pros**: Simple implementation, works immediately, no nested Docker daemon
+- **Cons**: Backend gets full Docker host access (security concern)
+- **Production Alternative**: Use Kubernetes Jobs or Docker socket proxy with restricted permissions
 
-The `shodh-judge:latest` image includes:
+#### Challenge 2: File Sharing Between Containers
 
-- **OpenJDK 17** (Java)
-- **Python 3**
-- **GCC/G++** (C++)
-- **Node.js 18** (JavaScript)
+**Problem:** Judge containers must access code files written by backend container
 
-## ⚠️ Current Limitations
+**Attempted Solution:** Docker volumes between containers - failed due to sibling container isolation
 
-1. **Authentication**: No user authentication system
-2. **Database**: Uses in-memory H2 (data lost on restart)
-3. **Memory Tracking**: Approximate memory usage (requires Docker stats API for precision)
+**Final Solution:** Host-mounted temp directory (`/tmp/judge`)
 
-## 🔮 Future Enhancements
+- Backend writes code files to host-mounted volume
+- Judge containers mount the same host directory
+- Both can read/write reliably
 
-- [x] Docker containerization for secure code execution ✅
-- [x] Support for multiple programming languages (Java, Python, C++, JavaScript) ✅
-- [ ] User authentication and authorization
-- [ ] WebSocket for real-time updates
-- [ ] PostgreSQL for production database
-- [ ] Admin panel for contest management
-- [ ] Code execution metrics and analytics
-- [ ] Problem difficulty ratings
-- [ ] User profiles and statistics
-- [ ] Advanced Docker resource monitoring with stats API
+**Trade-offs:**
 
-## 🧪 Testing the Application
+- **Pros**: Reliable, simple, works across all platforms
+- **Cons**: Leaves temporary files on host (mitigated with cleanup code in `finally` blocks)
 
-1. **Join Contest**: Use Contest ID `1` and any username
-2. **Select Problem**: Choose from Two Sum, Palindrome Number, or FizzBuzz
-3. **Write Code**: Use the Monaco editor to write your solution
-4. **Submit**: Click submit and watch the real-time status updates
-5. **View Leaderboard**: Switch to leaderboard tab to see rankings
+#### Challenge 3: Multi-Language Execution
 
-### Sample Solutions (Function-Only, LeetCode Style)
+**Problem:** Supporting Java, Python, C++, JavaScript with different compilation/execution workflows
 
-#### Two Sum (Java)
+**Solution:**
+
+- Built single judge image with all runtimes (OpenJDK 17, Python 3, GCC, Node.js)
+- Created language-specific code wrappers (`buildJavaProgramFromFunction`, etc.)
+- Conditional compilation (Java/C++ compile first, Python/JS direct execution)
+
+**Trade-offs:**
+
+- **Large image size** (~500MB) vs **fast startup** (image pre-pulled, no per-language switching)
+- **Complexity** in code parsing vs **better UX** (users write function-only code like LeetCode)
+
+#### Challenge 4: Security and Resource Limits
+
+**Problem:** Prevent malicious/buggy code from affecting host system
+
+**Solutions Implemented:**
+
+- **Network isolation**: `--network none` (no internet access)
+- **Non-root execution**: Code runs as `coderunner` user (UID 1000)
+- **Resource limits**: `--memory 256m`, `--cpus 1`
+- **Time limits**: Process killed after timeout
+- **Auto-cleanup**: Containers removed with `--rm` flag
+
+**Trade-offs:**
+
+- **Memory tracking**: Using Docker flags vs Docker Stats API
+  - **Chose flags**: Simpler, good enough for prototype
+  - **Missing**: Precise memory usage reporting
+- **Cleanup reliability**: Manual temp file deletion vs Docker volume lifecycle
+  - **Chose manual**: More control, immediate cleanup
+  - **Risk**: Files left behind if JVM crashes (rare)
+
+---
+
+## Project Structure
+
+```
+shodh-a-code/
+├── backend/                  # Spring Boot Backend
+│   ├── src/main/java/com/shodh/backend/
+│   │   ├── config/          # CORS, Async, Data Initialization
+│   │   ├── controller/      # REST API Endpoints
+│   │   ├── dto/            # Data Transfer Objects
+│   │   ├── model/          # JPA Entities
+│   │   ├── repository/     # Database Repositories
+│   │   └── service/        # Business Logic & Judge Engine
+│   ├── Dockerfile          # Backend container image
+│   └── pom.xml
+├── frontend/                # React Frontend
+│   ├── src/
+│   │   ├── components/     # Reusable UI Components
+│   │   ├── pages/         # Page Components
+│   │   └── services/      # API Integration Layer
+│   ├── Dockerfile         # Frontend container image
+│   └── package.json
+├── docker/
+│   └── judge/
+│       └── Dockerfile     # Multi-language execution environment
+└── docker-compose.yml     # Single-file orchestration
+```
+
+---
+
+## Technology Stack
+
+**Backend:** Spring Boot 3.5.7, Spring Data JPA, H2 Database, Lombok, Maven
+
+**Frontend:** React 18, Vite 5, Tailwind CSS, Monaco Editor, Axios, React Router
+
+**DevOps:** Docker, Docker Compose, Nginx
+
+---
+
+## Sample Solutions
+
+Users write **function-only code**. Backend wraps it into a complete program.
+
+### Two Sum (Java)
 
 ```java
 public int[] twoSum(int[] nums, int target) {
     java.util.Map<Integer, Integer> map = new java.util.HashMap<>();
     for (int i = 0; i < nums.length; i++) {
-        int complement = target - nums[i];
-        if (map.containsKey(complement)) {
-            return new int[] { map.get(complement), i };
+        if (map.containsKey(target - nums[i])) {
+            return new int[] { map.get(target - nums[i]), i };
         }
         map.put(nums[i], i);
     }
@@ -352,22 +365,21 @@ public int[] twoSum(int[] nums, int target) {
 }
 ```
 
-#### Palindrome Number (Java)
+### Palindrome Number (Java)
 
 ```java
 public boolean isPalindrome(int x) {
     if (x < 0) return false;
     int original = x, reversed = 0;
     while (x != 0) {
-        int digit = x % 10;
-        reversed = reversed * 10 + digit;
+        reversed = reversed * 10 + x % 10;
         x /= 10;
     }
     return reversed == original;
 }
 ```
 
-#### FizzBuzz (Java)
+### FizzBuzz (Java)
 
 ```java
 public java.util.List<String> fizzBuzz(int n) {
@@ -382,100 +394,8 @@ public java.util.List<String> fizzBuzz(int n) {
 }
 ```
 
-#### Two Sum (Python)
-
-```python
-def two_sum(nums, target):
-    seen = {}
-    for i, num in enumerate(nums):
-        complement = target - num
-        if complement in seen:
-            return [seen[complement], i]
-        seen[num] = i
-    return [0, 0]
-```
-
-#### Two Sum (C++)
-
-```cpp
-vector<int> twoSum(vector<int>& nums, int target) {
-    unordered_map<int, int> seen;
-    for (int i = 0; i < nums.size(); i++) {
-        int complement = target - nums[i];
-        if (seen.count(complement)) {
-            return {seen[complement], i};
-        }
-        seen[nums[i]] = i;
-    }
-    return {0, 0};
-}
-```
-
-#### Two Sum (JavaScript)
-
-```javascript
-function twoSum(nums, target) {
-  const seen = new Map();
-  for (let i = 0; i < nums.length; i++) {
-    const complement = target - nums[i];
-    if (seen.has(complement)) {
-      return [seen.get(complement), i];
-    }
-    seen.set(nums[i], i);
-  }
-  return [0, 0];
-}
-```
-
-## 🔧 Docker Troubleshooting
-
-### Issue: Backend can't spawn Docker containers
-
-**Problem**: Backend is running in Docker but can't execute judge containers.
-
-**Solution**: Ensure Docker socket is mounted in `docker-compose.yml`:
-
-```yaml
-volumes:
-  - /var/run/docker.sock:/var/run/docker.sock
-```
-
-### Issue: Permission denied on Docker socket
-
-**Solution**:
-
-```bash
-# On Linux, add your user to docker group
-sudo usermod -aG docker $USER
-# Then log out and back in
-```
-
-### Issue: Judge image not found
-
-**Solution**: Build the judge image first:
-
-```bash
-docker build -t shodh-judge:latest ./docker/judge
-```
-
-### Issue: Port already in use
-
-**Solution**: Change ports in `docker-compose.yml` or stop conflicting services:
-
-```bash
-# Check what's using port 8080
-netstat -ano | findstr :8080  # Windows
-lsof -i :8080                 # Mac/Linux
-```
-
-## 📝 License
-
-This project is built as an assessment for Shodh AI.
-
-## 🤝 Contributing
-
-This is an assessment project. For any questions or issues, please refer to the documentation above.
-
 ---
 
-Built with ❤️ using Spring Boot and React
+## License
+
+Built as an assessment for Shodh AI.
