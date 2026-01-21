@@ -107,7 +107,7 @@ const JoinPage = () => {
                   value={contestId}
                   onChange={(e) => setContestId(e.target.value)}
                   className="input-field"
-                  placeholder="Enter contest ID (e.g., 1)"
+                  placeholder="Enter contest ID (e.g., 1, 2)"
                   disabled={loading}
                 />
               </div>
@@ -121,7 +121,7 @@ const JoinPage = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="input-field"
-                  placeholder="Choose your username"
+                  placeholder="Choose your username (e.g. John, Jane, Charlie)"
                   disabled={loading}
                 />
               </div>
